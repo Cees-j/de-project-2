@@ -1,12 +1,12 @@
-# Work Sample for Data Engineer
+Work Sample for Data Engineer
 To effectively solve the following data pipeline problems, it is essential to use a DAG (Directed Acyclic Graph) oriented tool. DAG tools like Pachyderm, Airflow, Dagster, etc., can help streamline data processing and management with tracking data lineage, ensuring data integrity, and minimizing errors during processing.
 
 To provide more context and clarity, including pipeline specs and diagrams can be helpful. These artifacts can help visualize the DAG and its components, provide information on how data flows through the pipeline, and highlight the dependencies between tasks.
 
-# Problem 1: Raw Data Processing
+Problem 1: Raw Data Processing
 Objective: Ingest and process raw stock market datasets.
 
-# Tasks:
+Tasks:
 Download the ETF and stock datasets from the primary dataset available at https://www.kaggle.com/datasets/jacksoncrow/stock-market-dataset.
 Setup a data structure to retain all data from ETFs and stocks with the following columns.
 Symbol: string
@@ -22,13 +22,12 @@ Convert the resulting dataset into a structured format (e.g. Parquet).
 Problem 2: Feature Engineering
 Objective: Build some feature engineering on top of the dataset from Problem 1.
 
-# Tasks:
+Tasks:
 Calculate the moving average of the trading volume (Volume) of 30 days per each stock and ETF, and retain it in a newly added column vol_moving_avg.
 Similarly, calculate the rolling median and retain it in a newly added column adj_close_rolling_med.
 Retain the resulting dataset into the same format as Problem 1, but in its own stage/directory distinct from the first.
 (Bonus) Write unit tests for any relevant logic.
-
-# Problem 3: Integrate ML Training
+Problem 3: Integrate ML Training
 Objective: Integrate an ML predictive model training step into the data pipeline.
 
 You can use the following simple Random Forest model as a reference:
@@ -69,7 +68,7 @@ mae = mean_absolute_error(y_test, y_pred)
 mse = mean_squared_error(y_test, y_pred)
 You may come up with your own process with any choice of model architectures, algorithms, libraries, and training configurations.
 
-# Tasks:
+Tasks:
 Integrate the ML training process as a part of the data pipeline.
 Save the resulting model to disk.
 Persist any training metrics, such as loss and error values as log files.
@@ -77,7 +76,7 @@ Persist any training metrics, such as loss and error values as log files.
 Problem 4: Model Serving
 Objective: Build an API service to serve the trained predictive model.
 
-# Tasks:
+Tasks:
 Implement an API service to serve the trained predictive model.
 An /predict API endpoint which takes two values, vol_moving_avg and adj_close_rolling_med, and responds with an integer value that represents the trading volume.
 # hypothetical HTTP GET request and response
@@ -92,7 +91,7 @@ You can use AI assistants (such as ChatGPT or GitHub Copilot), but make sure to 
 Attribute tutorials, Stackoverflow Q&As, and any other references along with your solution.
 You are encouraged to ask any questions you may have during the hiring process, including but not limited to questions related to the work sample itself.
 You are more than welcome to keep your solutions public as a part of your professional portfolio.
-# Submission
+Submission
 Host all your solution code (Problem 1-4) in a open source repository (e.g. GitHub).
 In the same repository, Dockerize the entire workflow for Problems 1-3 (the data/training pipeline) with necessary dependencies and build/execution configurations.
 In the same repository, retain a log file from pipeline execution.

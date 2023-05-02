@@ -28,10 +28,8 @@ median_percentile = expr('percentile_approx(Adj_Close, 0.5)')
 rolling_med_data = data.withColumn('med_val', median_percentile.over(rolling_median_window))
 rolling_med_data.show()
 
-
-print(data.dtypes)
+# Round values 
 for c_name, c_type in data.dtypes:
-    print(c_type)
     if c_type == 'float':
         data = data.withColumn(c_name, round(col(c_name),4))
 

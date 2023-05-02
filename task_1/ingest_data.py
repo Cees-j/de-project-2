@@ -3,9 +3,6 @@ from pyspark.sql.functions import input_file_name, regexp_extract
 
 
 spark = SparkSession.builder.master("local").appName("CombineStockEtf").getOrCreate()
-schema = "Symbol STRING, Security_Name STRING, Date STRING, Open FLOAT, High FLOAT, Low FLOAT, Close FLOAT, Adj_Close FLOAT, Volume INT"
-final_dataset = spark.createDataFrame([], schema)
-
 
 stock_df = spark.read.csv("task_1/stocks/*.csv", header=True).withColumn("input_file", input_file_name())
 etf_df = spark.read.csv("task_1/etfs/*.csv", header=True).withColumn("input_file", input_file_name())
@@ -33,7 +30,5 @@ final_df = combined_df.join(lookup_df, on='Symbol', how='inner')
 final_dataset = final_df.select("Symbol", "Security_Name", "Date", "Open", "High", "Low", "Close", "Adj_Close", "Volume")
 
 
-# final_dataset.write.csv("task_1/output/final_dataset.csv", mode="overwrite", header=True)
-# final_dataset.write.parquet("task_1/output/final_dataset.parquet", mode="overwrite")
-
-print('dtypes', final_dataset.dtypes)
+final_dataset.write.csv("task_1/output/final_dataset.csv", mode="overwrite", header=True)
+final_dataset.write.parquet("task_1/output/final_dataset.parquet", mode="overwrite")

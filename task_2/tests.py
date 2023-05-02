@@ -1,9 +1,7 @@
 import unittest
 from pyspark.sql import SparkSession, Row
 from pyspark.sql.window import Window
-from pyspark.sql.functions import avg, collect_list, col, round, rand
-from pyspark.sql.types import StructType, StructField, StringType, IntegerType
-import random
+from pyspark.sql.functions import avg, col, round, expr
 from datetime import datetime, timedelta
 
 class TestMovingAverage(unittest.TestCase):
@@ -12,14 +10,8 @@ class TestMovingAverage(unittest.TestCase):
         cls.spark = SparkSession.builder \
             .appName("Moving Average Test") \
             .getOrCreate()
-
-    @classmethod
-    def tearDownClass(cls):
-        cls.spark.stop()
-
-    def test_moving_average(self):
-        # Sample data
-        data = [
+        
+        cls.test_data = cls.spark.createDataFrame([
             Row(Symbol='AAPL', Date='2021-01-01', Volume=100),
             Row(Symbol='AAPL', Date='2021-01-02', Volume=200),
             Row(Symbol='AAPL', Date='2021-01-03', Volume=300),
@@ -27,15 +19,19 @@ class TestMovingAverage(unittest.TestCase):
             Row(Symbol='AAPL', Date='2021-01-30', Volume=500),
             Row(Symbol='AAPL', Date='2021-02-01', Volume=1000),
             Row(Symbol='AAPL', Date='2021-02-23', Volume=2000)
-        ]
+        ])
 
+    @classmethod
+    def tearDownClass(cls):
+        cls.spark.stop()
+
+    def test_moving_average(self): 
         expected_moving_average = (100.0, 150.0, 200.0, 250.0, 300.0, 480, 1166.67)
-        # Create a DataFrame from the sample data
-        data_df = self.spark.createDataFrame(data)
+       
 
         # Calculate the moving average
         moving_average_window = Window.partitionBy('Symbol').orderBy(col('Date').cast('timestamp').cast('long')).rangeBetween(-30 * 86400, 0)
-        result_df = data_df.withColumn('vol_moving_avg', round(avg('Volume').over(moving_average_window),2))
+        result_df = self.test_data.withColumn('vol_moving_avg', round(avg('Volume').over(moving_average_window),2))
 
         # Format values into tuple
         actual_moving_averages = result_df.select('vol_moving_avg')
@@ -79,7 +75,26 @@ class TestMovingAverage(unittest.TestCase):
         print('PRINTING', tuple(numeric_values_list))
 
         self.assertEqual(tuple(numeric_values_list), expected_moving_average)
+ 
 
+    def test_rolling_median(self):
+        rolling_median_window = Window.partitionBy('Symbol').orderBy(col('Date').cast('timestamp').cast('long')).rangeBetween(-30 * 86400, 0)
+        median_percentile = expr('percentile_approx(Adj_Close, 0.5)')
+        rolling_med_data = self.test_data.withColumn('med_val', median_percentile.over(rolling_median_window))
 
+        result = rolling_med_data.collect()
+
+        expected_result = [
+            Row(Symbol='AAPL', Date='2021-01-01', Volume=100, med_val=100),
+            Row(Symbol='AAPL', Date='2021-01-02', Volume=200, med_val=150),
+            Row(Symbol='AAPL', Date='2021-01-03', Volume=300, med_val=200),
+            Row(Symbol='AAPL', Date='2021-01-04', Volume=400, med_val=250),
+            Row(Symbol='AAPL', Date='2021-01-30', Volume=500, med_val=400),
+            Row(Symbol='AAPL', Date='2021-02-01', Volume=1000, med_val=500),
+            Row(Symbol='AAPL', Date='2021-02-23', Volume=2000, med_val=1000)
+        ]
+
+        self.assertEqual(result, expected_result)
+        
 if __name__ == '__main__':
     unittest.main()

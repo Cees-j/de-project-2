@@ -23,7 +23,7 @@ data.show()
 
 
 # Rolling Median Window
-rolling_median_window = Window.partitionBy('Symbol').orderBy('Date')
+rolling_median_window = Window.partitionBy('Symbol').orderBy(col('Date').cast('timestamp').cast('long')).rangeBetween(-30 * 86400, 0)
 median_percentile = expr('percentile_approx(Adj_Close, 0.5)')
 rolling_med_data = data.withColumn('med_val', median_percentile.over(rolling_median_window))
 rolling_med_data.show()
